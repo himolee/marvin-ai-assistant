@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marvin AI Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Marvin AI Assistant</h1>
+        <div class="chat-container">
+            <div id="chat-messages">
+                <p>Welcome to Marvin AI Assistant! How can I help you today?</p>
+            </div>
+        </div>
+        <div class="input-group">
+            <input type="text" id="message-input" placeholder="Type your message here..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const messages = document.getElementById('chat-messages');
+            
+            if (input.value.trim()) {
+                messages.innerHTML += `<p><strong>You:</strong> ${input.value}</p>`;
+                messages.innerHTML += `<p><strong>Marvin:</strong> I'm processing your request...</p>`;
+                input.value = '';
+                messages.scrollTop = messages.scrollHeight;
+            }
+        }
+
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
