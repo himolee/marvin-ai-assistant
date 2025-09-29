@@ -1,9 +1,9 @@
 """
-Simplified app with hardcoded login
+Marvin AI Assistant - Main Application
 """
 
 from fastapi import FastAPI, Request, Form, HTTPException, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import os
@@ -35,7 +35,20 @@ async def login(request: Request, username: str = Form(...), password: str = For
 
 @app.get("/chat", response_class=HTMLResponse)
 async def chat_page(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("chat.html", {"request": request})
+
+@app.post("/chat")
+async def process_chat(request: Request, message: str = Form(...)):
+    # Simple echo response for now
+    response = f"You said: {message}"
+    return templates.TemplateResponse(
+        "chat.html", 
+        {"request": request, "message": message, "response": response}
+    )
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request):
+    return templates.TemplateResponse("admin.html", {"request": request})
 
 @app.get("/health")
 async def health_check():
