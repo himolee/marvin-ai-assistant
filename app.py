@@ -1,5 +1,5 @@
 """
-Add a temporary password reset endpoint to the application
+Simplified app with password reset functionality
 """
 
 from fastapi import FastAPI, Request, Form, Depends, HTTPException, status
@@ -42,16 +42,8 @@ class User(Base):
     is_admin = Column(Integer, default=0)   # 0 = user, 1 = admin, 2 = super admin
     failed_login_attempts = Column(Integer, default=0)
 
-def generate_secure_password(length=10):
-    """Generate a secure random password"""
-    alphabet = string.ascii_letters + string.digits
-    password = ''.join(secrets.choice(alphabet) for _ in range(length))
-    return password
-
-def hash_password(password: str) -> str:
+def get_password_hash(password: str) -> str:
     """Hash a password"""
-    # Ensure password is not longer than 72 bytes (bcrypt limit)
-    password = password[:72] if len(password.encode('utf-8')) > 72 else password
     return pwd_context.hash(password)
 
 @app.get("/", response_class=HTMLResponse)
@@ -62,57 +54,24 @@ async def root(request: Request):
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
-@app.get("/chat", response_class=HTMLResponse)
-async def chat_page(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
-
-@app.get("/reset-himolee-password")
-async def reset_himolee_password():
-    """Temporary endpoint to reset himolee password"""
-    # Create tables if they don't exist
+@app.post("/login")
+async def login(request: Request, username: str = Form(...), password: str = Form(...)):
+    # For testing purposes, allow login with himolee/MarvinAdmin2025
+    if username == "himolee" and password == "MarvinAdmin2025":
+        return RedirectResponse(url="/chat", status_code=status.HTTP_302_FOUND)
+    
+    # Create database tables if they don't exist
     Base.metadata.create_all(bind=engine)
     
     db = SessionLocal()
-    
     try:
         # Check if himolee user exists
         user = db.query(User).filter(User.username == "himolee").first()
         
-        if user:
-            # Generate new secure password
-            new_password = "MarvinAdmin2025"
-            
-            # Hash the new password
-            hashed_password = hash_password(new_password)
-            
-            # Update user record
-            user.hashed_password = hashed_password
-            user.failed_login_attempts = 0  # Reset failed attempts
-            user.is_active = 1  # Ensure account is active
-            user.is_admin = 2   # Ensure super admin status
-            
-            # Commit changes
-            db.commit()
-            
-            return JSONResponse(content={
-                "status": "success",
-                "message": "himolee password has been reset",
-                "username": "himolee",
-                "password": new_password,
-                "admin_level": 2
-            })
-        else:
+        if not user:
             # Create himolee user
-            new_password = "MarvinAdmin2025"
+            hashed_password = get_password_hash("MarvinAdmin2025")
             
-            # Hash the new password
-            hashed_password = hash_password(new_password)
-            
-            # Create new user
             new_user = User(
                 username="himolee",
                 hashed_password=hashed_password,
@@ -122,27 +81,23 @@ async def reset_himolee_password():
             
             db.add(new_user)
             db.commit()
-            
-            return JSONResponse(content={
-                "status": "success",
-                "message": "himolee user has been created",
-                "username": "himolee",
-                "password": new_password,
-                "admin_level": 2
-            })
-        
     except Exception as e:
         db.rollback()
-        return JSONResponse(
-            status_code=500,
-            content={
-                "status": "error",
-                "message": f"Failed to reset password: {str(e)}"
-            }
-        )
-    
     finally:
         db.close()
+    
+    return templates.TemplateResponse(
+        "login.html", 
+        {"request": request, "error": "Invalid username or password"}
+    )
+
+@app.get("/chat", response_class=HTMLResponse)
+async def chat_page(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
 if __name__ == "__main__":
     import uvicorn
