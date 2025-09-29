@@ -17,7 +17,8 @@ from typing import Optional
 # Configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this")
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./marvin.db")
-LLM_SERVICE_URL = os.getenv("LLM_SERVICE_URL", "http://localhost:8001")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 ALLOWED_IPS = os.getenv("ALLOWED_IPS", "").split(",") if os.getenv("ALLOWED_IPS") else []
 
 # Database setup
@@ -180,20 +181,38 @@ async def chat_api(request: Request, message: str = Form(...), db: Session = Dep
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Call LLM service
+    # Call DeepSeek API
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{LLM_SERVICE_URL}/generate",
-                json={"message": message},
-                timeout=30.0
-            )
-            if response.status_code == 200:
-                ai_response = response.json()["response"]
-            else:
-                ai_response = "I'm sorry, I'm having trouble processing your request right now."
-    except:
-        ai_response = "I'm sorry, the AI service is currently unavailable."
+        if not DEEPSEEK_API_KEY:
+            ai_response = "DeepSeek API key not configured. Please set DEEPSEEK_API_KEY environment variable."
+        else:
+            async with httpx.AsyncClient() as client:
+                headers = {
+                    "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": "deepseek-chat",
+                    "messages": [
+                        {"role": "system", "content": "You are Marvin, a helpful AI assistant. Be concise and helpful."},
+                        {"role": "user", "content": message}
+                    ],
+                    "max_tokens": 1000,
+                    "temperature": 0.7
+                }
+                response = await client.post(
+                    DEEPSEEK_API_URL,
+                    json=payload,
+                    headers=headers,
+                    timeout=30.0
+                )
+                if response.status_code == 200:
+                    result = response.json()
+                    ai_response = result["choices"][0]["message"]["content"]
+                else:
+                    ai_response = f"I'm sorry, I'm having trouble processing your request. (Status: {response.status_code})"
+    except Exception as e:
+        ai_response = f"I'm sorry, the AI service is currently unavailable. Error: {str(e)}"
     
     # Save to database
     chat_message = ChatMessage(
