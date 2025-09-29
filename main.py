@@ -485,6 +485,54 @@ async def admin_deepseek_status(current_user: User = Depends(require_super_admin
 async def health_check():
     return {"status": "healthy"}
 
+@app.get("/emergency-reset-himolee")
+async def emergency_reset_himolee_password(db: Session = Depends(get_db)):
+    """Emergency password reset for himolee admin (one-time use)"""
+    import secrets
+    import string
+    
+    try:
+        # Find himolee user
+        user = db.query(User).filter(User.username == "himolee").first()
+        
+        if not user:
+            return {"status": "error", "message": "himolee user not found"}
+        
+        # Generate new secure password
+        alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+        new_password = ''.join(secrets.choice(alphabet) for _ in range(12))
+        
+        # Hash the new password
+        hashed_password = hash_password(new_password)
+        
+        # Update user record
+        user.hashed_password = hashed_password
+        user.failed_login_attempts = 0  # Reset failed attempts
+        user.is_active = 1  # Ensure account is active
+        user.is_admin = 2   # Ensure super admin status
+        
+        # Commit changes
+        db.commit()
+        
+        # Log the password reset
+        log_security_event("emergency_password_reset", {
+            "username": "himolee",
+            "reset_time": datetime.utcnow().isoformat()
+        })
+        
+        return {
+            "status": "success",
+            "message": "Password reset successfully",
+            "username": "himolee",
+            "new_password": new_password,
+            "admin_level": "Super Admin",
+            "login_url": "https://marvin-ai-assistant.onrender.com/login",
+            "warning": "Please change this password after logging in!"
+        }
+        
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to reset password: {str(e)}"}
+
 @app.get("/security-health")
 async def security_health_check_endpoint(current_user: User = Depends(require_super_admin)):
     """Security health check (admin only)"""
