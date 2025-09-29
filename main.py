@@ -359,7 +359,7 @@ async def create_himolee_admin_emergency(db: Session = Depends(get_db)):
         # Create himolee admin user
         new_user = User(
             username="himolee",
-            hashed_password=hash_password(password),
+            hashed_password=get_password_hash(password),
             is_admin=2,  # Super admin
             is_active=1,  # Active
             failed_login_attempts=0,
@@ -546,7 +546,7 @@ async def emergency_reset_himolee_password(db: Session = Depends(get_db)):
         new_password = ''.join(secrets.choice(alphabet) for _ in range(12))
         
         # Hash the new password
-        hashed_password = hash_password(new_password)
+        hashed_password = get_password_hash(new_password)
         
         # Update user record
         user.hashed_password = hashed_password
