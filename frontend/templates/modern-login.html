@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marvin AI Assistant - Login</title>
+    <link rel="stylesheet" href="/static/modern-style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2563eb, #8b5cf6, #06b6d4);
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #2563eb, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .app-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin: 0.25rem 0 0 0;
+        }
+        
+        .form-section h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-wrapper input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 2.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgb(37 99 235 / 0.3);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .login-btn:hover::before {
+            left: 100%;
+        }
+        
+        .info-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+        
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .security-features {
+            margin-top: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .security-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        
+        .security-icon {
+            color: var(--success-color);
+            font-size: 0.875rem;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+        }
+        
+        .loading-spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+            
+            .security-features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-section">
+                <span class="logo-icon">🤖</span>
+                <h1 class="app-title">Marvin AI Assistant</h1>
+                <p class="app-subtitle">Intelligent AI-powered assistance</p>
+            </div>
+            
+            <div class="form-section">
+                <h2>Welcome Back</h2>
+                
+                {% if error %}
+                    <div class="error">
+                        <strong>⚠️ Authentication Failed</strong><br>
+                        {{ error }}
+                    </div>
+                {% endif %}
+                
+                {% if success %}
+                    <div class="success">
+                        <strong>✅ Success</strong><br>
+                        {{ success }}
+                    </div>
+                {% endif %}
+                
+                <form method="post" action="/login" id="loginForm">
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                    
+                    <button type="submit" class="login-btn">
+                        Sign In Securely
+                    </button>
+                </form>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-badge">
+                    <span>🛡️</span>
+                    <span>Admin Access Only</span>
+                </div>
+                
+                <div class="security-features">
+                    <div class="security-item">
+                        <span class="security-icon">✓</span>
+                        <span>End-to-end Encryption</span>
+                    </div>
+                    <div class="security-item">
+                        <span class="security-icon">✓</span>
+                        <span>Rate Limiting</span>
+                    </div>
+                    <div class="security-item">
+                        <span class="security-icon">✓</span>
+                        <span>Secure Headers</span>
+                    </div>
+                    <div class="security-item">
+                        <span class="security-icon">✓</span>
+                        <span>Input Validation</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Enhanced form handling with loading states
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const submitBtn = document.querySelector('.login-btn');
+            
+            // Show loading state
+            loadingOverlay.style.display = 'flex';
+            submitBtn.disabled = true;
+            
+            // Auto-hide loading after 10 seconds as fallback
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+                submitBtn.disabled = false;
+            }, 10000);
+        });
+        
+        // Auto-focus username field
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('username').focus();
+        });
+        
+        // Enhanced keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                const form = e.target.closest('form');
+                const inputs = Array.from(form.querySelectorAll('input'));
+                const currentIndex = inputs.indexOf(e.target);
+                
+                if (currentIndex < inputs.length - 1) {
+                    e.preventDefault();
+                    inputs[currentIndex + 1].focus();
+                }
+            }
+        });
+        
+        // Input validation feedback
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '') {
+                    this.style.borderColor = 'var(--error-color)';
+                } else {
+                    this.style.borderColor = 'var(--success-color)';
+                }
+            });
+            
+            input.addEventListener('focus', function() {
+                this.style.borderColor = 'var(--primary-color)';
+            });
+        });
+    </script>
+</body>
+</html>
