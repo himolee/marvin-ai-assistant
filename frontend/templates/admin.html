@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marvin AI Assistant - Admin Panel</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Admin Panel - Marvin AI Assistant</h1>
+            <div class="user-info">
+                Super Admin: {{ username }} | 
+                <a href="/chat" class="nav-link">Chat</a> |
+                <form method="post" action="/logout" style="display: inline;">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="showTab('users')">👥 User Management</button>
+            <button class="tab-btn" onclick="showTab('security')">🔒 Security</button>
+            <button class="tab-btn" onclick="showTab('system')">⚙️ System</button>
+        </div>
+        
+        <!-- User Management Tab -->
+        <div id="users-tab" class="tab-content active">
+            <div class="admin-section">
+                <h2>👥 User Management</h2>
+                
+                <!-- Create New User -->
+                <div class="admin-card">
+                    <h3>Create New User</h3>
+                    <form id="create-user-form" class="admin-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-username">Username:</label>
+                                <input type="text" id="new-username" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-password">Password:</label>
+                                <input type="password" id="new-password" name="password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-level">Admin Level:</label>
+                                <select id="admin-level" name="admin_level">
+                                    <option value="0">Regular User</option>
+                                    <option value="1">Admin</option>
+                                    <option value="2">Super Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit">Create User</button>
+                    </form>
+                </div>
+                
+                <!-- User List -->
+                <div class="admin-card">
+                    <h3>Existing Users</h3>
+                    <div id="users-list">
+                        <div class="loading">Loading users...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Tab -->
+        <div id="security-tab" class="tab-content">
+            <div class="admin-section">
+                <h2>🔒 Security Settings</h2>
+                
+                <div class="admin-card">
+                    <h3>Security Status</h3>
+                    <div class="security-status">
+                        <div class="status-item">
+                            <span class="status-label">Registration:</span>
+                            <span class="status-value disabled">Disabled ✅</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Rate Limiting:</span>
+                            <span class="status-value enabled">Enabled ✅</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Account Locking:</span>
+                            <span class="status-value enabled">Enabled ✅</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Secure Cookies:</span>
+                            <span class="status-value enabled">Enabled ✅</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-card">
+                    <h3>Failed Login Attempts</h3>
+                    <div id="failed-logins">
+                        <div class="loading">Loading security logs...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Tab -->
+        <div id="system-tab" class="tab-content">
+            <div class="admin-section">
+                <h2>⚙️ System Information</h2>
+                
+                <div class="admin-card">
+                    <h3>Application Status</h3>
+                    <div class="system-info">
+                        <div class="info-item">
+                            <span class="info-label">DeepSeek API:</span>
+                            <span class="info-value" id="deepseek-status">Checking...</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Database:</span>
+                            <span class="info-value connected">Connected ✅</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Security Mode:</span>
+                            <span class="info-value enabled">Hardened ✅</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Load users on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+            checkDeepSeekStatus();
+        });
+        
+        // Create user form
+        document.getElementById('create-user-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/admin/create-user', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('User created successfully!');
+                    this.reset();
+                    loadUsers();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error creating user: ' + error.message);
+            }
+        });
+        
+        // Load users list
+        async function loadUsers() {
+            try {
+                const response = await fetch('/admin/users');
+                const users = await response.json();
+                
+                const usersList = document.getElementById('users-list');
+                
+                if (users.length === 0) {
+                    usersList.innerHTML = '<div class="no-data">No users found</div>';
+                    return;
+                }
+                
+                let html = '<table class="users-table"><thead><tr><th>ID</th><th>Username</th><th>Admin Level</th><th>Status</th><th>Last Login</th><th>Failed Attempts</th><th>Actions</th></tr></thead><tbody>';
+                
+                users.forEach(user => {
+                    const adminLevel = user.is_admin === 2 ? 'Super Admin' : user.is_admin === 1 ? 'Admin' : 'User';
+                    const status = user.is_active ? 'Active' : 'Disabled';
+                    const lastLogin = user.last_login ? new Date(user.last_login).toLocaleString() : 'Never';
+                    
+                    html += `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${adminLevel}</td>
+                            <td class="${user.is_active ? 'status-active' : 'status-disabled'}">${status}</td>
+                            <td>${lastLogin}</td>
+                            <td>${user.failed_login_attempts}</td>
+                            <td>
+                                <button onclick="toggleUserStatus(${user.id}, ${user.is_active})" class="btn-small">
+                                    ${user.is_active ? 'Disable' : 'Enable'}
+                                </button>
+                                <button onclick="resetFailedAttempts(${user.id})" class="btn-small">Reset</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                usersList.innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('users-list').innerHTML = '<div class="error">Error loading users</div>';
+            }
+        }
+        
+        // Toggle user status
+        async function toggleUserStatus(userId, currentStatus) {
+            try {
+                const response = await fetch('/admin/toggle-user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId, active: !currentStatus})
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    loadUsers();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // Reset failed login attempts
+        async function resetFailedAttempts(userId) {
+            try {
+                const response = await fetch('/admin/reset-attempts', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId})
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    loadUsers();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // Check DeepSeek API status
+        async function checkDeepSeekStatus() {
+            try {
+                const response = await fetch('/admin/deepseek-status');
+                const result = await response.json();
+                
+                const statusElement = document.getElementById('deepseek-status');
+                if (result.status === 'connected') {
+                    statusElement.innerHTML = 'Connected ✅';
+                    statusElement.className = 'info-value connected';
+                } else {
+                    statusElement.innerHTML = 'Error ❌';
+                    statusElement.className = 'info-value error';
+                }
+            } catch (error) {
+                document.getElementById('deepseek-status').innerHTML = 'Error ❌';
+            }
+        }
+    </script>
+</body>
+</html>

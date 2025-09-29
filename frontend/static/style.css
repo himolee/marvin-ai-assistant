@@ -166,3 +166,169 @@ button:hover {
     background: #ffebee;
     color: #c62828;
 }
+
+
+/* Admin Panel Styles */
+.admin-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+}
+
+.tab-btn.active {
+    border-bottom-color: #007bff;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.admin-section {
+    margin-bottom: 30px;
+}
+
+.admin-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.admin-card h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.admin-form {
+    margin-top: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    align-items: end;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.users-table th,
+.users-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.users-table th {
+    background: #f8f9fa;
+    font-weight: bold;
+}
+
+.btn-small {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 5px;
+}
+
+.btn-small:hover {
+    background: #5a6268;
+}
+
+.status-active {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-disabled {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.security-status,
+.system-info {
+    margin-top: 15px;
+}
+
+.status-item,
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.status-label,
+.info-label {
+    font-weight: bold;
+    color: #333;
+}
+
+.status-value.enabled,
+.info-value.connected {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-value.disabled {
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.info-value.error {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.loading {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+.nav-link {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+}
