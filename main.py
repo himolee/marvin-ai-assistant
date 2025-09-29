@@ -339,6 +339,49 @@ async def upgrade_himolee_admin(db: Session = Depends(get_db)):
     except Exception as e:
         return {"error": f"Upgrade failed: {str(e)}"}
 
+# Temporary endpoint to create himolee admin account
+@app.get("/create-himolee-admin-emergency")
+async def create_himolee_admin_emergency(db: Session = Depends(get_db)):
+    """Emergency endpoint to create himolee admin account"""
+    import secrets
+    import string
+    
+    try:
+        # Check if himolee already exists
+        existing_user = db.query(User).filter(User.username == "himolee").first()
+        if existing_user:
+            return {"error": "himolee user already exists", "message": "Use password reset endpoint instead"}
+        
+        # Generate secure password
+        alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+        password = ''.join(secrets.choice(alphabet) for _ in range(12))
+        
+        # Create himolee admin user
+        new_user = User(
+            username="himolee",
+            hashed_password=hash_password(password),
+            is_admin=2,  # Super admin
+            is_active=1,  # Active
+            failed_login_attempts=0,
+            created_at=datetime.utcnow()
+        )
+        
+        db.add(new_user)
+        db.commit()
+        
+        return {
+            "status": "success",
+            "message": "himolee admin account created successfully!",
+            "username": "himolee",
+            "password": password,
+            "admin_level": "Super Admin (Level 2)",
+            "login_url": "https://marvin-ai-assistant.onrender.com/login",
+            "warning": "Please change this password after logging in!"
+        }
+        
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to create account: {str(e)}"}
+
 # Helper functions for admin access
 def get_current_user_admin_level(token: str, db: Session):
     """Get current user's admin level from token"""
